@@ -30,7 +30,7 @@ bool GA::init()
 		for (int j = 0; j < item_num; j++)
 		{
 			data[i].isIncluded[j] = (distribution(engine) == 1 ? true : false);//遺伝子の初期設定
-																			   //data[i].isIncluded[j] = false;
+			//data[i].isIncluded[j] = false;//初期値全部0のとき
 			printf_s("%d", data[i].isIncluded[j] ? 1 : 0);
 
 			data[i].r_value += value[j] * data[i].isIncluded[j];
@@ -55,28 +55,25 @@ bool GA::selection()
 
 	resultSumValue = 0;
 	for (int i = 0; i < max_genom_list; i++)
+	//ルーレット選択用に評価関数の合計と一番評価の良い番号を取得
 	{
 		resultSumValue += prev_data[i].result;
 		if (prev_data[i].result > prev_data[max_num].result)
-		{
 			max_num = i;
-		}
 	}
 
-	data[0] = prev_data[max_num];
-	if (data[0].result - prev_data[0].result >= 1)
-	{
+	data[0] = prev_data[max_num];//データの先頭は最も評価の良い個体
+	if (data[0].result - prev_data[0].result >= 1)//最も評価の良い個体の変化の監視(デバッグ用)
 		ret = true;
-	}
 
 	for (int i = 1; i < max_genom_list; i++)
 	{
-		double selector = distribution(engine);
-		double needle = 0;
+		double selector = distribution(engine);//乱数を生成
+		double needle = 0;//ルーレットの針を生成
 		int j = 0;
 		for (;; j++)
 		{
-			needle += prev_data[j].result / resultSumValue;
+			needle += prev_data[j].result / resultSumValue;//ルーレットの針を乱数の値まで進める
 			if (needle > selector)
 				break;
 			if (j == max_genom_list - 1)
@@ -84,7 +81,6 @@ bool GA::selection()
 		}
 		data[i] = prev_data[j];
 	}
-
 	return ret;
 }
 
@@ -95,23 +91,18 @@ bool GA::crossover()
 	std::random_device rnd;
 	std::mt19937 engine(rnd());
 	std::uniform_real_distribution<double> distribution(0, 1.0);
-	std::vector<bool> uniform_temp(item_num);
 
-	for (int i = 0; i < max_genom_list; i += 2)
+	for (int i = 0; i < max_genom_list; i += 2)//2個ずつ交叉
 	{
 		for (int j = 0; j < item_num; j++)
 		{
-			uniform_temp[j] = (distribution(engine) >= crossoverRate ? true : false);//trueで交叉なし
-		}
-		for (int j = 0; j < item_num; j++)
-		{
-			data[i + 1].isIncluded[j] = uniform_temp[j] ? prev_data[i + 1].isIncluded[j] : prev_data[i].isIncluded[j];
-			if (j == 0)
+			bool isCrossover= (distribution(engine) >= crossoverRate ? true : false);//trueで交叉なし
+			data[i + 1].isIncluded[j] = isCrossover ? prev_data[i + 1].isIncluded[j] : prev_data[i].isIncluded[j];
+			if (j == 0)//先頭のデータは保護
 				break;
-			data[i].isIncluded[j] = uniform_temp[j] ? prev_data[i].isIncluded[j] : prev_data[i + 1].isIncluded[j];
+			data[i].isIncluded[j] = isCrossover ? prev_data[i].isIncluded[j] : prev_data[i + 1].isIncluded[j];
 		}
 	}
-
 	return true;
 }
 
@@ -123,11 +114,11 @@ bool GA::mutation()
 
 	for (int i = 1; i < max_genom_list; i++)
 	{
-		if (distribution(engine) <= individualMutationRate)
+		if (distribution(engine) <= individualMutationRate)//個体突然変異率の計算
 		{
 			for (int j = 0; j < item_num; j++)
 			{
-				data[i].isIncluded[j] = distribution(engine) <= genomMutaionRate ? !data[i].isIncluded[j] : data[i].isIncluded[j];
+				data[i].isIncluded[j] = distribution(engine) <= genomMutaionRate ? !data[i].isIncluded[j] : data[i].isIncluded[j];//遺伝子突然変異率の計算　変化する場合はビット反転
 			}
 		}
 	}
@@ -143,20 +134,18 @@ bool GA::calc(bool enableDisplay)
 
 		for (int j = 0; j < item_num; j++)
 		{
-			data[i].r_value += value[j] * data[i].isIncluded[j];
-			data[i].r_weight += weight[j] * data[i].isIncluded[j];
+			data[i].r_value += value[j] * data[i].isIncluded[j];//個体の合計価値を計算
+			data[i].r_weight += weight[j] * data[i].isIncluded[j];//個体の合計重さを計算
 
 			if (enableDisplay)
-			{
-				printf_s("%d", data[i].isIncluded[j] ? 1 : 0);
-			}
+				printf_s("%d", data[i].isIncluded[j] ? 1 : 0);//デバッグ用
 		}
-		data[i].calcResult(max_weight);
-		if (enableDisplay)
+		data[i].calcResult(max_weight);//評価関数の計算
+		if (enableDisplay)//デバッグ用
 			printf_s(" \t sumValue=%.0lf\t sumWeight=%.0lf\t Result=%.4lf\n", data[i].r_value, data[i].r_weight, data[i].result);
 	}
 
-	if (enableDisplay)
+	if (enableDisplay)//デバッグ用
 	{
 		for (int i = 0; i < item_num; i++)
 		{
@@ -165,7 +154,6 @@ bool GA::calc(bool enableDisplay)
 		}
 		printf_s("=%lf\n", data[0].result);
 	}
-
 	return true;
 }
 

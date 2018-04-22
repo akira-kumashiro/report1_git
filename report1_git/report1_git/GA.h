@@ -42,7 +42,7 @@ public:
 			if (r_weight > _maxWeight)//最大重量を超えている時
 			{
 				if (r_weight != 0)
-					result = coefficient / ((r_weight-_maxWeight)*(r_weight - _maxWeight));//超えるほど評価関数の値が悪くなるように
+					result = coefficient / ((r_weight-_maxWeight));//超えるほど評価関数の値が悪くなるように
 				else
 					result = 0;
 				//result = r_value * coefficient;//これだと超えるほど評価関数の値が良くなる
