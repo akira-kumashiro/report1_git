@@ -98,9 +98,8 @@ bool GA::uniformityCrossover()
 		{
 			bool isCrossover = (distribution(engine) >= crossoverRate ? true : false);//trueで交叉なし
 			data[i + 1].isIncluded[j] = isCrossover ? prev_data[i + 1].isIncluded[j] : prev_data[i].isIncluded[j];
-			if (i == 0)//先頭のデータは保護
-				break;
-			data[i].isIncluded[j] = isCrossover ? prev_data[i].isIncluded[j] : prev_data[i + 1].isIncluded[j];
+			if (i != 0)//先頭のデータは保護
+				data[i].isIncluded[j] = isCrossover ? prev_data[i].isIncluded[j] : prev_data[i + 1].isIncluded[j];
 		}
 	}
 	return true;
@@ -114,17 +113,27 @@ bool GA::onePointCrossover()
 	std::mt19937 engine(rnd());
 	std::uniform_real_distribution<double> distribution(0, 1.0);
 
+
 	for (int i = 0; i < max_genom_list; i += 2)//2個ずつ交叉
 	{
+		std::uniform_int_distribution<int> disInt1(0, item_num -1);
+		int del1 = disInt1(engine);
 		if (distribution(engine) <= crossoverRate)
 		{
-			for (int j = item_num / 2 - 1; j < item_num; j++)
+			for (int j = 0; j < del1; j++)
 			{
-				//bool isCrossover = (distribution(engine) >= crossoverRate ? true : false);//trueで交叉なし
 				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
-				if (i == 0)//先頭のデータは保護
-					break;
-				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
+				if (i != 0)//先頭のデータは保護
+					data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
+			}
+		}
+		if (distribution(engine) <= crossoverRate)
+		{
+			for (int j = del1; j < item_num; j++)
+			{
+				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
+				if (i != 0)//先頭のデータは保護
+					data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
 			}
 		}
 	}
@@ -155,9 +164,8 @@ bool GA::twoPointCrossover()
 			for (int j = 0; j < del1; j++)
 			{
 				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
-				if (i == 0)//先頭のデータは保護
-					break;
-				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
+				if (i != 0)//先頭のデータは保護
+					data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
 			}
 		}
 		if (distribution(engine) <= crossoverRate)
@@ -165,9 +173,8 @@ bool GA::twoPointCrossover()
 			for (int j = del1; j < del2; j++)
 			{
 				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
-				if (i == 0)//先頭のデータは保護
-					break;
-				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
+				if (i != 0)//先頭のデータは保護
+					data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
 			}
 		}
 
@@ -176,9 +183,8 @@ bool GA::twoPointCrossover()
 			for (int j = del2; j < item_num; j++)
 			{
 				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
-				if (i == 0)//先頭のデータは保護
-					break;
-				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
+				if (i != 0)//先頭のデータは保護
+					data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
 			}
 		}
 	}

@@ -13,7 +13,7 @@ private:
 	int max_weight;//最大重量
 	double crossoverRate = 0.8;//交叉率
 	double individualMutationRate = 0.3;//個体突然変異率
-	double genomMutaionRate = 0.02;//遺伝子突然変異率
+	double genomMutaionRate = 0.04;//遺伝子突然変異率
 public:
 	std::vector<double> weight;//重さの配列
 	std::vector<double> value;//価値の配列
@@ -22,7 +22,7 @@ public:
 	class Data//データ格納用クラス
 	{
 	private:
-		double coefficient = 0.001;//評価関数用の定数
+		double coefficient = 0.1;//評価関数用の定数
 		int item_num;//品物の数
 	public:
 		std::vector<bool> isIncluded;//品物を入れるかどうかの配列
