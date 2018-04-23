@@ -13,7 +13,7 @@ private:
 	int max_weight;//最大重量
 	double crossoverRate = 0.8;//交叉率
 	double individualMutationRate = 0.3;//個体突然変異率
-	double genomMutaionRate = 0.3;//遺伝子突然変異率
+	double genomMutaionRate = 0.02;//遺伝子突然変異率
 public:
 	std::vector<double> weight;//重さの配列
 	std::vector<double> value;//価値の配列
@@ -59,7 +59,10 @@ public:
 	GA(int _max_genom_list, int _item_num, int _max_weight, std::vector<double> weight, std::vector<double> value);	//コンストラクタ
 	bool init();//初期化
 	bool selection();//選択
-	bool crossover();//交叉
+
+	bool uniformityCrossover();//交叉
+	bool onePointCrossover();
+	bool twoPointCrossover();
 	bool mutation();//突然変異
 	bool calc(bool enableDisplay);//評価関数の計算
 

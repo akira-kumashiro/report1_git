@@ -55,7 +55,7 @@ bool GA::selection()
 
 	resultSumValue = 0;
 	for (int i = 0; i < max_genom_list; i++)
-	//ルーレット選択用に評価関数の合計と一番評価の良い番号を取得
+		//ルーレット選択用に評価関数の合計と一番評価の良い番号を取得
 	{
 		resultSumValue += prev_data[i].result;
 		if (prev_data[i].result > prev_data[max_num].result)
@@ -84,7 +84,7 @@ bool GA::selection()
 	return ret;
 }
 
-bool GA::crossover()
+bool GA::uniformityCrossover()
 {
 	prev_data = data;
 
@@ -96,11 +96,90 @@ bool GA::crossover()
 	{
 		for (int j = 0; j < item_num; j++)
 		{
-			bool isCrossover= (distribution(engine) >= crossoverRate ? true : false);//trueで交叉なし
+			bool isCrossover = (distribution(engine) >= crossoverRate ? true : false);//trueで交叉なし
 			data[i + 1].isIncluded[j] = isCrossover ? prev_data[i + 1].isIncluded[j] : prev_data[i].isIncluded[j];
-			if (j == 0)//先頭のデータは保護
+			if (i == 0)//先頭のデータは保護
 				break;
 			data[i].isIncluded[j] = isCrossover ? prev_data[i].isIncluded[j] : prev_data[i + 1].isIncluded[j];
+		}
+	}
+	return true;
+}
+
+bool GA::onePointCrossover()
+{
+	prev_data = data;
+
+	std::random_device rnd;
+	std::mt19937 engine(rnd());
+	std::uniform_real_distribution<double> distribution(0, 1.0);
+
+	for (int i = 0; i < max_genom_list; i += 2)//2個ずつ交叉
+	{
+		if (distribution(engine) <= crossoverRate)
+		{
+			for (int j = item_num / 2 - 1; j < item_num; j++)
+			{
+				//bool isCrossover = (distribution(engine) >= crossoverRate ? true : false);//trueで交叉なし
+				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
+				if (i == 0)//先頭のデータは保護
+					break;
+				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
+			}
+		}
+	}
+	return true;
+}
+
+bool GA::twoPointCrossover()
+{
+	prev_data = data;
+
+	std::random_device rnd;
+	std::mt19937 engine(rnd());
+	std::uniform_real_distribution<double> distribution(0, 1.0);
+	//std::uniform_int_distribution<int> disInt(0, 25);
+
+
+	for (int i = 0; i < max_genom_list; i += 2)//2個ずつ交叉
+	{
+		/*double d1 = distribution(engine) / 2;
+		int del1 = d1*item_num;
+		int del2 = d1 != 0 ? (distribution(engine) / (1 - d1) + d1)*item_num:distribution(engine)*item_num;*/
+		std::uniform_int_distribution<int> disInt1(0, item_num / 2);
+		int del1 = disInt1(engine);
+		std::uniform_int_distribution<int> disInt2(del1, item_num - 1);
+		int del2 = disInt2(engine);
+		if (distribution(engine) <= crossoverRate)
+		{
+			for (int j = 0; j < del1; j++)
+			{
+				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
+				if (i == 0)//先頭のデータは保護
+					break;
+				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
+			}
+		}
+		if (distribution(engine) <= crossoverRate)
+		{
+			for (int j = del1; j < del2; j++)
+			{
+				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
+				if (i == 0)//先頭のデータは保護
+					break;
+				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
+			}
+		}
+
+		if (distribution(engine) <= crossoverRate)
+		{
+			for (int j = del2; j < item_num; j++)
+			{
+				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
+				if (i == 0)//先頭のデータは保護
+					break;
+				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
+			}
 		}
 	}
 	return true;
