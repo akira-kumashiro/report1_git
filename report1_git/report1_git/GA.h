@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <random>
+#include <algorithm>
 
 class GA
 {
@@ -14,6 +15,7 @@ private:
 	double crossoverRate = 0.8;//交叉率
 	double individualMutationRate = 0.3;//個体突然変異率
 	double genomMutaionRate = 0.04;//遺伝子突然変異率
+	int minNum = 0, maxNum = 0;
 public:
 	std::vector<double> weight;//重さの配列
 	std::vector<double> value;//価値の配列
@@ -53,9 +55,14 @@ public:
 			}
 			return result;
 		}
+		double calcAlt(double _maxWeight)
+		{
+			return calcResult(_maxWeight / 2);
+		}
 	};
 
 	std::vector<Data> data, prev_data;//操作前後で値を保持するために2個
+	Data eliteData;
 	GA(int _max_genom_list, int _item_num, int _max_weight, std::vector<double> weight, std::vector<double> value);	//コンストラクタ
 	bool init();//初期化
 	bool selection();//選択
@@ -63,8 +70,9 @@ public:
 	bool uniformityCrossover();//交叉
 	bool onePointCrossover();
 	bool twoPointCrossover();
+	bool tsunoPointCrossover();
 	bool mutation();//突然変異
-	bool calc(bool enableDisplay);//評価関数の計算
+	bool calc(bool enableDisplay,int epoc);//評価関数の計算
 
 	~GA();//デコンストラクタ
 };
