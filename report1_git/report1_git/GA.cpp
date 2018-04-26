@@ -19,18 +19,13 @@ GA::GA(int _max_genom_list, int _item_num, int _max_weight, std::vector<double> 
 
 bool GA::init()
 {
-	//乱数の設定
-	std::random_device rnd;
-	std::mt19937 engine(rnd());
-	std::uniform_int_distribution<int> distribution(0, 1);
-
 	for (int i = 0; i < max_genom_list; i++)
 	{
 		data[i].r_value = 0;
 		data[i].r_weight = 0;
 		for (int j = 0; j < item_num; j++)
 		{
-			data[i].isIncluded[j] = (distribution(engine) == 1 ? true : false);//遺伝子の初期設定
+			data[i].isIncluded[j] = (random(0,1) == 1 ? true : false);//遺伝子の初期設定
 			//data[i].isIncluded[j] = false;//初期値全部0のとき
 			printf_s("%d", data[i].isIncluded[j] ? 1 : 0);
 
@@ -48,10 +43,10 @@ bool GA::init()
 bool GA::selection()
 {
 	int max_num = 0;//最も評価の良い個体の番号
-	std::random_device rnd;
-	std::mt19937 engine(rnd());
-	std::uniform_real_distribution<double> distribution(0, 1.0);
 	bool ret = false;
+
+	calc(false);
+
 	prev_data = data;
 
 	resultSumValue = 0;
@@ -70,12 +65,12 @@ bool GA::selection()
 
 	for (int i = 0; i < max_genom_list; i++)
 	{
-		double selector = distribution(engine);//乱数を生成
+		double selector = random(0.0,1.0);//乱数を生成
 		double needle = 0;//ルーレットの針を生成
 		int j = 0;
 		for (;; j++)
 		{
-			needle += prev_data[j].result / resultSumValue;//ルーレットの針を乱数の値まで進める
+			needle += (prev_data[j].result / resultSumValue);//ルーレットの針を乱数の値まで進める
 			if (needle > selector)
 				break;
 			if (j == (max_genom_list - 1))
@@ -90,15 +85,11 @@ bool GA::uniformityCrossover()
 {
 	prev_data = data;
 
-	std::random_device rnd;
-	std::mt19937 engine(rnd());
-	std::uniform_real_distribution<double> distribution(0, 1.0);
-
 	for (int i = 0; i < max_genom_list; i += 2)//2個ずつ交叉
 	{
 		for (int j = 0; j < item_num; j++)
 		{
-			bool isCrossover = (distribution(engine) >= crossoverRate ? true : false);//trueで交叉なし
+			bool isCrossover = (random(0.0,1.0) >= crossoverRate ? true : false);//trueで交叉なし
 			data[i + 1].isIncluded[j] = isCrossover ? prev_data[i + 1].isIncluded[j] : prev_data[i].isIncluded[j];
 			//if (i != 0)//先頭のデータは保護
 			data[i].isIncluded[j] = isCrossover ? prev_data[i].isIncluded[j] : prev_data[i + 1].isIncluded[j];
@@ -111,30 +102,22 @@ bool GA::onePointCrossover()
 {
 	prev_data = data;
 
-	std::random_device rnd;
-	std::mt19937 engine(rnd());
-	std::uniform_real_distribution<double> distribution(0, 1.0);
-
-
 	for (int i = 0; i < max_genom_list; i += 2)//2個ずつ交叉
 	{
-		std::uniform_int_distribution<int> disInt1(0, item_num - 1);
-		int del1 = disInt1(engine);
-		if (distribution(engine) <= crossoverRate)
+		int del1 = random(0, item_num - 1);
+		if (random(0.0,1.0) <= crossoverRate)
 		{
 			for (int j = 0; j < del1; j++)
 			{
 				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
-				//if (i != 0)//先頭のデータは保護
 				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
 			}
 		}
-		if (distribution(engine) <= crossoverRate)
+		if (random(0.0,1.0) <= crossoverRate)
 		{
 			for (int j = del1; j < item_num; j++)
 			{
 				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
-				//if (i != 0)//先頭のデータは保護
 				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
 			}
 		}
@@ -146,46 +129,32 @@ bool GA::twoPointCrossover()
 {
 	prev_data = data;
 
-	std::random_device rnd;
-	std::mt19937 engine(rnd());
-	std::uniform_real_distribution<double> distribution(0, 1.0);
-	//std::uniform_int_distribution<int> disInt(0, 25);
-
-
 	for (int i = 0; i < max_genom_list; i += 2)//2個ずつ交叉
 	{
-		/*double d1 = distribution(engine) / 2;
-		int del1 = d1*item_num;
-		int del2 = d1 != 0 ? (distribution(engine) / (1 - d1) + d1)*item_num:distribution(engine)*item_num;*/
-		std::uniform_int_distribution<int> disInt1(0, item_num / 2);
-		int del1 = disInt1(engine);
-		std::uniform_int_distribution<int> disInt2(del1, item_num - 1);
-		int del2 = disInt2(engine);
-		if (distribution(engine) <= crossoverRate)
+		int del1 = random(0, item_num / 2);
+		int del2 = random(del1, item_num - 1);
+		if (random(0.0,1.0) <= crossoverRate)
 		{
 			for (int j = 0; j < del1; j++)
 			{
 				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
-				//if (i != 0)//先頭のデータは保護
 				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
 			}
 		}
-		if (distribution(engine) <= crossoverRate)
+		if (random(0.0, 1.0) <= crossoverRate)
 		{
 			for (int j = del1; j < del2; j++)
 			{
 				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
-				//if (i != 0)//先頭のデータは保護
 				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
 			}
 		}
 
-		if (distribution(engine) <= crossoverRate)
+		if (random(0.0, 1.0) <= crossoverRate)
 		{
 			for (int j = del2; j < item_num; j++)
 			{
 				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
-				//if (i != 0)//先頭のデータは保護
 				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
 			}
 		}
@@ -197,22 +166,15 @@ bool GA::tsunoPointCrossover()
 {
 	prev_data = data;
 
-	std::random_device rnd;
-	std::mt19937 engine(rnd());
-	std::uniform_real_distribution<double> distribution(0, 1.0);
-
 	for (int i = 0; i < max_genom_list; i += 2)//2個ずつ交叉
 	{
-		std::uniform_int_distribution<int> disInt1(0, item_num - 1);
-		int del1 = disInt1(engine);
-		std::uniform_int_distribution<int> disInt2(del1, item_num);
-		int del2 = disInt2(engine);
-		if (distribution(engine) <= crossoverRate)
+		int del1 = random(0, item_num - 1);
+		int del2 = random(del1, item_num);
+		if (random(0.0,1.0) <= crossoverRate)
 		{
 			for (int j = del1; j < del2; j++)
 			{
 				data[i + 1].isIncluded[j] = prev_data[i].isIncluded[j];
-				//if (i != 0)//先頭のデータは保護
 				data[i].isIncluded[j] = prev_data[i + 1].isIncluded[j];
 			}
 		}
@@ -223,16 +185,11 @@ bool GA::tsunoPointCrossover()
 
 bool GA::mutation()
 {
-	std::mt19937 engine;
-	std::uniform_real_distribution<double> distribution0to1(0, 1.0);
-	std::uniform_int_distribution<int> distribution0to49(0, item_num - 1);
-	//	std::vector<bool> uniform_temp(item_num);
-
 	for (int i = 0; i < max_genom_list; i++)
 	{
-		if (distribution0to1(engine) <= individualMutationRate)//個体突然変異率の計算
+		if (random(0.0, 1.0) <= individualMutationRate)//個体突然変異率の計算
 		{
-			int point = distribution0to49(engine);
+			int point = random(0, item_num - 1);
 			data[i].isIncluded[point] = !data[i].isIncluded[point];
 			//			for (int j = 0; j < item_num; j++)
 			//			{
@@ -243,7 +200,7 @@ bool GA::mutation()
 	return true;
 }
 
-bool GA::calc(bool enableDisplay, int epoc)
+bool GA::calc(bool enableDisplay)
 {
 	for (int i = 0; i < max_genom_list; i++)
 	{
@@ -254,14 +211,8 @@ bool GA::calc(bool enableDisplay, int epoc)
 		{
 			data[i].r_value += value[j] * data[i].isIncluded[j];//個体の合計価値を計算
 			data[i].r_weight += weight[j] * data[i].isIncluded[j];//個体の合計重さを計算
-
-//			if (enableDisplay)
-//				printf_s("%d", data[i].isIncluded[j] ? 1 : 0);//デバッグ用
 		}
-		if (epoc % 1000 < 50 && epoc > 1000)
-			data[i].calcResult(max_weight /2);
-		else
-			data[i].calcResult(max_weight);//評価関数の計算
+		data[i].calcResult(max_weight);//評価関数の計算
 		if (data[i].result < data[minNum].result)
 		{
 			minNum = i;
@@ -270,26 +221,13 @@ bool GA::calc(bool enableDisplay, int epoc)
 		{
 			maxNum = i;
 		}
-		//		if (enableDisplay)//デバッグ用
-		//			printf_s(" \t sumValue=%.0lf\t sumWeight=%.0lf\t Result=%.4lf\n", data[i].r_value, data[i].r_weight, data[i].result);
 	}
-	//	if (data[maxNum].result < eliteData.result)
-	//	{
 	data[minNum] = eliteData;
-	//	}
-	//	else
-	//	{
-	//		data[minNum] = data[maxNum];
-	//	}
-
-	//std::sort(data.begin(), data.end(),[](const Data& x, const Data& y) { return x.result > y.result; });
-
 
 	if (enableDisplay)
 	{
 		for (int i = 0; i < max_genom_list; i++)
 		{
-			//data[i].calcResult(max_weight);//評価関数の計算
 			for (int j = 0; j < item_num; j++)
 			{
 				printf_s("%d", data[i].isIncluded[j] ? 1 : 0);//デバッグ用
@@ -309,6 +247,35 @@ bool GA::calc(bool enableDisplay, int epoc)
 	}
 	return true;
 }
+
+int GA::random(int min, int max)
+{
+	//乱数の設定
+	std::random_device rnd;
+	std::mt19937 engine(rnd());
+	std::uniform_int_distribution<int> distribution(min, max);
+	return distribution(engine);
+}
+
+double GA::random(int min, double max)
+{
+	return random((double)min,max);
+}
+
+double GA::random(double min, int max)
+{
+	return random(min,(double)max);
+}
+
+double GA::random(double min, double max)
+{
+	std::random_device rnd;
+	std::mt19937 engine(rnd());
+	std::uniform_real_distribution<double> distribution(min, max);
+	return distribution(engine);
+}
+
+
 
 GA::~GA()
 {

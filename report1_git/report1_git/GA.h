@@ -43,11 +43,12 @@ public:
 		{
 			if (r_weight > _maxWeight)//最大重量を超えている時
 			{
-				if (r_weight != 0)
-					result = coefficient / ((r_weight-_maxWeight));//超えるほど評価関数の値が悪くなるように
-				else
-					result = 0;
-				//result = r_value * coefficient;//これだと超えるほど評価関数の値が良くなる
+				//if (r_weight != 0)
+				result = coefficient / ((r_weight - _maxWeight));//超えるほど評価関数の値が悪くなるように
+				//result = 1;
+			//else
+			//	result = 0;
+			//result = r_value * coefficient;//これだと超えるほど評価関数の値が良くなる
 			}
 			else//最大重量を超えなければそのまま
 			{
@@ -72,7 +73,11 @@ public:
 	bool twoPointCrossover();
 	bool tsunoPointCrossover();
 	bool mutation();//突然変異
-	bool calc(bool enableDisplay,int epoc);//評価関数の計算
+	bool calc(bool enableDisplay);//評価関数の計算
+	int random(int min, int max);
+	double random(int min, double max);
+	double random(double min, int max);
+	double random(double min, double max);
 
 	~GA();//デコンストラクタ
 };
